@@ -1,0 +1,127 @@
+create table branch
+(
+bname varchar(10) primary key,
+city varchar(10),
+assets real
+);
+
+
+create table account
+(
+accno int primary key,
+bname varchar(10),
+balance real,
+foreign key(bname) references branch(bname)
+);
+
+
+create table cust
+(
+cname varchar(10) primary key,
+street varchar(10) not null,
+city varchar(10) not null
+);
+
+
+create table depositor
+(
+cname varchar(10),
+accno int,
+primary key(cname,accno),
+foreign key(accno) references account(accno) on delete cascade,
+foreign key(cname) references cust(cname) on delete cascade
+);
+
+
+
+create table loan
+(
+lno int primary key,
+bname varchar(10) not null,
+amt real,
+foreign key(bname) references branch(bname) on delete cascade
+);
+
+
+create table borrower
+(
+cname varchar(10),
+lno int,
+primary key(cname,lno),
+foreign key(cname) references cust(cname) on delete cascade,
+foreign key(lno) references loan(lno) on delete cascade
+);
+
+
+insert into branch values('abc','bang',1200000);
+insert into branch values('def','che',2000000);
+insert into branch values('abn','mum',330000);
+insert into branch values('xyz','hyd',555555);
+insert into branch values('mno','bang',9999999);
+select * from branch;
+
+
+insert into account values(1,'abc',25000);
+insert into account values(2,'def',2000);
+insert into account values(3,'def',1000);
+insert into account values(4,'abn',10000);
+insert into account values(5,'mno',600000);
+insert into account values(6,'xyz',50000);
+select * from account;
+
+
+insert into cust values('mik','ab','bang');
+insert into cust values('muj','cd','bang');
+insert into cust values('maj','ef','che');
+insert into cust values('waj','xy','del');
+insert into cust values('prad','lm','mum');
+insert into cust values('now','op','hyd');
+select * from cust;
+
+
+insert into depositor values('mik',2);
+insert into depositor values('muj',1);
+insert into depositor values('muj',5);
+insert into depositor values('prad',4);
+insert into depositor values('maj',3);
+insert into depositor values('waj',6);
+insert into depositor values('mik',3);
+select * from depositor;
+
+
+insert into loan values(1,'abc',5000);
+insert into loan values(2,'def',1500);
+insert into loan values(3,'abn',10000);
+insert into loan values(4,'xyz',3500);
+insert into loan values(5,'mno',20000);
+select * from loan;
+
+insert into borrower values('mik',2);
+insert into borrower values('muj',1);
+insert into borrower values('prad',3);
+insert into borrower values('maj',4);
+insert into borrower values('waj',5);
+select * from borrower;
+
+
+
+
+select cname from account a,depositor d
+where a.accno=d.accno and bname ='def' group by cname
+having count(*)>1;
+
+select cname from cust c where not exists
+(select bname from branch where city='bang' minus
+select bname from depositor d, account a 
+where d.accno=a.accno and d.cname=c.cname)
+and exists
+(select bname from branch where city='bang');
+
+
+delete from account where bname in
+(select bname from branch where city='che');
+select * from account;
+
+
+
+
